@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Right One Comes Round</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(ellipse at center, #1a1a1a 0%, #0d0d0d 100%);
+      color: #eee;
+      margin: 0;
+      padding-top: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .heart-frame {
+      position: relative;
+      padding: 20px;
+      background: #222;
+      border-radius: 20px;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 0 18px rgba(255, 105, 180, 0.3);
+      text-align: center;
+      border: 4px solid transparent;
+      background-image: linear-gradient(#222, #222),
+                        radial-gradient(circle at top left, #ff5fa2, #ffc1cc);
+      background-origin: border-box;
+      background-clip: content-box, border-box;
+    }
+
+    .heart-frame::before {
+      content: '❤';
+      font-size: 60px;
+      color: #ff80ab;
+      position: absolute;
+      top: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: pulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.12); }
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      color: #ffb3c6;
+      text-shadow: 0 0 4px #ff80ab;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 2px solid #ff80ab;
+    }
+
+    button {
+      background: linear-gradient(145deg, #ff5fa2, #ff80ab);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: bold;
+      margin-top: 16px;
+      box-shadow: 0 0 8px rgba(255, 105, 180, 0.4);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.5s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 16px rgba(255, 105, 180, 0.6);
+    }
+
+    p {
+      font-size: 1rem;
+      line-height: 1.45;
+      margin-top: 0;
+    }
+
+    @media (max-width: 400px) {
+      .heart-frame::before {
+        font-size: 50px;
+        top: -30px;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      p {
+        font-size: 0.95rem;
+      }
+
+      button {
+        font-size: 0.9rem;
+        padding: 8px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="heart-frame">
+    <h1>The Right One Comes Round</h1>
+    <div class="dialogue-box" id="story">
+      <p><img src="Pic1.png" alt="Scene 1" /><br>You and your man are chilling. It's just another day... but something in your heart stirs.</p>
+    </div>
+    <button id="nextBtn" onclick="nextPart()">Continue</button>
+  </div>
+
+  <audio id="paperSound" src="Paper.mp3" preload="auto"></audio>
+
+  <script>
+    const story = document.getElementById('story');
+    const button = document.getElementById('nextBtn');
+    const paperSound = document.getElementById('paperSound');
+
+    const lines = [
+      { img: 'Pic1.png', text: "You’ve been thinking... what if someone else could see him the way you do?" },
+      { img: 'Pic1.png', text: "Not out of jealousy — but joy. You want someone to admire him too." },
+      { img: 'Pic1.png', text: "Then, one day, a man walks in. Quiet, observant. Soft-spoken." },
+      { img: 'Pic2.png', text: "He notices your man. Really sees him. The way he moves. The way he listens." },
+      { img: 'Pic2.png', text: "'He's special,' the newcomer says. You smile. 'I know.'" },
+      { img: 'Pic2.png', text: "They talk. It's natural. Deep. You watch the connection grow." },
+      { img: 'Pic3.png', text: "You’re not threatened — you're moved. This is what love wants: to expand." },
+      { img: 'Pic3.png', text: "Your man glances at you. His eyes ask, 'Are you okay?' You nod. Fully." },
+      { img: 'Pic3.png', text: "This... is right. Not ordinary. But honest. The right one came round — for him." },
+      { img: 'Pic4.png', text: "The End. Or maybe just a new kind of beginning." }
+    ];
+
+    let index = 0;
+
+    function nextPart() {
+      if (index < lines.length) {
+        const line = lines[index];
+        story.innerHTML = `<p><img src="${line.img}" alt="Scene ${index + 1}" /><br>${line.text}</p>`;
+        index++;
+
+        // Play the paper sound
+        paperSound.currentTime = 0;
+        paperSound.play().catch(e => console.log("Sound play failed (possibly due to user gesture):", e));
+
+        if (index === lines.length) {
+          button.style.opacity = '0';
+          setTimeout(() => {
+            button.style.display = 'none';
+            story.innerHTML += `
+              <div style="margin-top: 20px;">
+                <button onclick="restartStory()">Replay</button>
+              </div>`;
+          }, 500);
+        }
+      }
+    }
+
+    function restartStory() {
+      index = 0;
+      button.style.display = 'block';
+      button.style.opacity = '1';
+      const line = lines[0];
+      story.innerHTML = `<p><img src="${line.img}" alt="Scene 1" /><br>${line.text}</p>`;
+      index = 1;
+    }
+  </script>
+
+</body>
+</html>
