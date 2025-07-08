@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crude Insult Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #ff4500;
+        }
+        #insult {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Crude Insult Generator</h1>
+    <button onclick="generateInsult()">Get Insult</button>
+    <div id="insult"></div>
+
+    <script>
+        const insults = [
+            "You're like a cloud. When you disappear, it's a beautiful day.",
+            "If I had a dollar for every time you said something stupid, I'd be rich.",
+            "You bring everyone so much joy when you leave the room.",
+            "You're proof that even the most useless things have a purpose.",
+            "You're like a software update. Whenever I see you, I think, 'Not now.'",
+            "You have the perfect face for radio.",
+            "If ignorance is bliss, you must be the happiest person alive.",
+            "You're not stupid; you just have bad luck thinking.",
+            "You're like a phone with no signal—useless.",
+            "I would agree with you, but then we'd both be wrong."
+        ];
+
+        function generateInsult() {
+            const randomIndex = Math.floor(Math.random() * insults.length);
+            const insult = insults[randomIndex];
+            document.getElementById("insult").textContent = insult;
+        }
+    </script>
+
+</body>
+</html>
