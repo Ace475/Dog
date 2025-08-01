@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Puzzle Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tile {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border: none;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .tile:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .tile.empty {
+            background: transparent;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+            cursor: default;
+        }
+
+        .tile.empty:hover {
+            transform: none;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            color: #feca57;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .win-message {
+            background: linear-gradient(45deg, #00f260, #0575e6);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            animation: celebration 0.5s ease-in-out;
+            display: none;
+        }
+
+        @keyframes celebration {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 2rem; }
+            .tile { font-size: 1.2rem; min-height: 50px; }
+            .puzzle-grid { max-width: 280px; gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+    <button class="sound-toggle" onclick="toggleSound()" id="soundBtn">🔊</button>
+    
+    <div class="game-container">
+        <h1>🧩 Slide Puzzle</h1>
+        <p class="subtitle">Arrange numbers 1-15 in order!</p>
+        
+        <div class="controls">
+            <button onclick="newGame()">New Game</button>
+            <button onclick="shufflePuzzle()">Shuffle</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div>Moves</div>
+                <div class="stat-value" id="moves">0</div>
+            </div>
+            <div class="stat">
+                <div>Time</div>
+                <div class="stat-value" id="time">0:00</div>
+            </div>
+        </div>
+
+        <div class="puzzle-grid" id="grid"></div>
+        
+        <div class="win-message" id="winMessage">
+            🎉 Congratulations! You solved it! 🎉
+        </div>
+    </div>
+
+    <script>
+        let grid = [];
+        let emptyPos = { row: 3, col: 3 };
+        let moves = 0;
+        let startTime = null;
+        let gameTimer = null;
+        let soundEnabled = true;
+
+        // Audio context for sound effects
+        let audioContext;
+        
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(frequency, duration, type = 'sine') {
+            if (!soundEnabled || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playMoveSound() {
+            playSound(400, 0.1, 'square');
+        }
+
+        function playWinSound() {
+            // Play a celebratory melody
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((note, i) => {
+                setTimeout(() => playSound(note, 0.3, 'sine'), i * 150);
+            });
+        }
+
+        function playShuffleSound() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => playSound(200 + Math.random() * 400, 0.1, 'sawtooth'), i * 50);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
+        }
+
+        function initGrid() {
+            grid = [];
+            for (let i = 0; i < 4; i++) {
+                grid[i] = [];
+                for (let j = 0; j < 4; j++) {
+                    grid[i][j] = i * 4 + j + 1;
+                }
+            }
+            grid[3][3] = 0; // Empty space
+            emptyPos = { row: 3, col: 3 };
+        }
+
+        function renderGrid() {
+            const gridElement = document.getElementById('grid');
+            gridElement.innerHTML = '';
+            
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    const tile = document.createElement('button');
+                    tile.className = 'tile';
+                    
+                    if (grid[i][j] === 0) {
+                        tile.className += ' empty';
+                        tile.textContent = '';
+                    } else {
+                        tile.textContent = grid[i][j];
+                        tile.onclick = () => moveTile(i, j);
+                    }
+                    
+                    gridElement.appendChild(tile);
+                }
+            }
+        }
+
+        function canMove(row, col) {
+            const dr = Math.abs(row - emptyPos.row);
+            const dc = Math.abs(col - emptyPos.col);
+            return (dr === 1 && dc === 0) || (dr === 0 && dc === 1);
+        }
+
+        function moveTile(row, col) {
+            if (!canMove(row, col)) return;
+            
+            initAudio();
+            playMoveSound();
+            
+            // Swap tile with empty space
+            grid[emptyPos.row][emptyPos.col] = grid[row][col];
+            grid[row][col] = 0;
+            emptyPos = { row, col };
+            
+            moves++;
+            document.getElementById('moves').textContent = moves;
+            
+            if (!startTime) {
+                startTime = Date.now();
+                startTimer();
+            }
+            
+            renderGrid();
+            
+            if (checkWin()) {
+                setTimeout(() => {
+                    document.getElementById('winMessage').style.display = 'block';
+                    playWinSound();
+                    stopTimer();
+                }, 300);
+            }
+        }
+
+        function checkWin() {
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    const expected = i * 4 + j + 1;
+                    if (i === 3 && j === 3) {
+                        if (grid[i][j] !== 0) return false;
+                    } else if (grid[i][j] !== expected) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function shufflePuzzle() {
+            initAudio();
+            playShuffleSound();
+            
+            // Perform random valid moves to shuffle
+            for (let i = 0; i < 1000; i++) {
+                const possibleMoves = [];
+                
+                // Find all possible moves
+                for (let r = 0; r < 4; r++) {
+                    for (let c = 0; c < 4; c++) {
+                        if (canMove(r, c)) {
+                            possibleMoves.push({ row: r, col: c });
+                        }
+                    }
+                }
+                
+                // Make a random move
+                if (possibleMoves.length > 0) {
+                    const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                    const { row, col } = randomMove;
+                    
+                    // Swap without updating UI or counters
+                    grid[emptyPos.row][emptyPos.col] = grid[row][col];
+                    grid[row][col] = 0;
+                    emptyPos = { row, col };
+                }
+            }
+            
+            renderGrid();
+        }
+
+        function newGame() {
+            initGrid();
+            shufflePuzzle();
+            moves = 0;
+            startTime = null;
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('time').textContent = '0:00';
+            document.getElementById('winMessage').style.display = 'none';
+            stopTimer();
+        }
+
+        function startTimer() {
+            gameTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('time').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+        }
+
+        // Initialize the game
+        initGrid();
+        renderGrid();
+        
+        // Add touch event handling for mobile
+        document.addEventListener('touchstart', function() {
+            initAudio();
+        }, { once: true });
+        
+        document.addEventListener('click', function() {
+            initAudio();
+        }, { once: true });
+    </script>
+</body>
+</html>
